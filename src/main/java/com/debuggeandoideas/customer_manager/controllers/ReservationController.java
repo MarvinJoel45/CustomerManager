@@ -3,6 +3,7 @@ package com.debuggeandoideas.customer_manager.controllers;
 import com.debuggeandoideas.customer_manager.clients.ReservationCrudClient;
 import com.debuggeandoideas.customer_manager.dtos.ReservationRequest;
 import com.debuggeandoideas.customer_manager.dtos.ReservationResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -27,11 +28,11 @@ public class ReservationController {
     private final ReservationCrudClient reservationCrudClient;
 
     @PostMapping
-    public Mono<ResponseEntity<Object>> postReservation(@RequestBody ReservationRequest request) {
+    public Mono<ResponseEntity<Object>> postReservation(@Valid @RequestBody ReservationRequest request) {
         log.info("POST customer/reservation");
 
         return this.reservationCrudClient.create(request)
-                .map(res -> ResponseEntity.created(URI.create(res.getRestaurantId())).build())
+                .map(resource -> ResponseEntity.created(URI.create(resource)).build())
                 .onErrorResume(IllegalArgumentException.class, error -> {
                     log.error("POST customer/reservation failed");
                     return Mono.just(ResponseEntity.badRequest().build());
@@ -60,7 +61,7 @@ public class ReservationController {
 
     @PutMapping(path = "{id}")
     public Mono<ResponseEntity<ReservationResponse>> putReservation(@PathVariable String id,
-                                                                    @RequestBody ReservationRequest request) {
+                                                                    @Valid @RequestBody ReservationRequest request) {
         log.info("PUT customer/reservation/{}",id);
 
         return this.reservationCrudClient.update(id,request)
