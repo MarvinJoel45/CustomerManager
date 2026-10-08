@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
+import java.net.URI;
+
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -25,16 +27,35 @@ public class ReservationController {
     private final ReservationCrudClient reservationCrudClient;
 
     @PostMapping
-    public Mono<ResponseEntity<ReservationResponse>> postReservation(@RequestBody ReservationRequest request) {
+    public Mono<ResponseEntity<Object>> postReservation(@RequestBody ReservationRequest request) {
         log.info("POST customer/reservation");
-        return null;
+
+        return this.reservationCrudClient.create(request)
+                .map(res -> ResponseEntity.created(URI.create(res.getRestaurantId())).build())
+                .onErrorResume(IllegalArgumentException.class, error -> {
+                    log.error("POST customer/reservation failed");
+                    return Mono.just(ResponseEntity.badRequest().build());
+                })
+                .onErrorResume(RuntimeException.class, error -> {
+                    log.error("POST customer/reservation failed");
+                    return Mono.just(ResponseEntity.internalServerError().build());
+                });
     }
 
     @GetMapping(path = "{id}")
     public Mono<ResponseEntity<ReservationResponse>> getReservation(@PathVariable String id) {
         log.info("GET customer/reservation/{}",id);
 
-        return null;
+        return this.reservationCrudClient.read(id)
+                .map(ResponseEntity::ok)
+                .onErrorResume(IllegalArgumentException.class, error -> {
+                    log.error("GET customer/reservation failed");
+                    return Mono.just(ResponseEntity.badRequest().build());
+                })
+                .onErrorResume(RuntimeException.class, error -> {
+                    log.error("GET customer/reservation failed");
+                    return Mono.just(ResponseEntity.internalServerError().build());
+                });
     }
 
     @PutMapping(path = "{id}")
@@ -42,13 +63,31 @@ public class ReservationController {
                                                                     @RequestBody ReservationRequest request) {
         log.info("PUT customer/reservation/{}",id);
 
-        return null;
+        return this.reservationCrudClient.update(id,request)
+                .map(ResponseEntity::ok)
+                .onErrorResume(IllegalArgumentException.class, error -> {
+                    log.error("PUT customer/reservation failed");
+                    return Mono.just(ResponseEntity.badRequest().build());
+                })
+                .onErrorResume(RuntimeException.class, error -> {
+                    log.error("PUT customer/reservation failed");
+                    return Mono.just(ResponseEntity.internalServerError().build());
+                });
     }
 
     @DeleteMapping(path = "{id}")
-    public Mono<ResponseEntity<Void>> deleteReservation(@PathVariable String id) {
+    public Mono<ResponseEntity<Object>> deleteReservation(@PathVariable String id) {
         log.info("DELETE customer/reservation/{}",id);
 
-        return null;
+        return this.reservationCrudClient.delete(id)
+                .then(Mono.just(ResponseEntity.noContent().build()))
+                .onErrorResume(IllegalArgumentException.class, error -> {
+                    log.error("DELETE customer/reservation failed");
+                    return Mono.just(ResponseEntity.badRequest().build());
+                })
+                .onErrorResume(RuntimeException.class, error -> {
+                    log.error("DELETE customer/reservation failed");
+                    return Mono.just(ResponseEntity.internalServerError().build());
+                });
     }
 }
