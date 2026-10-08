@@ -6,7 +6,7 @@ import reactor.core.publisher.Mono;
 
 public interface ReservationCrudClient {
 
-    Mono<ReservationResponse> create(ReservationRequest reservationRequest);
+    Mono<String> create(ReservationRequest reservationRequest);
     Mono<ReservationResponse> read(String uuid);
     Mono<ReservationResponse> update(String uuid, ReservationRequest reservationRequest);
     Mono<Void> delete(String uuid);
