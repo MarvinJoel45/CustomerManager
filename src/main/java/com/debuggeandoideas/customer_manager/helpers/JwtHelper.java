@@ -38,20 +38,32 @@ public class JwtHelper {
 
     @SuppressWarnings("unchecked")
     public List<String> getRolesFromJwt(String jwt) {
-        Claims claims = this.getClaimsFromToken(jwt);
+        Claims claims = this.getClaimsFromJwt(jwt);
 
         return (List<String>) claims.get("roles");
     }
 
+    public boolean validateJwt(String jwt) {
+
+        try {
+            final Claims claims = this.getClaimsFromJwt(jwt);
+            final Date expirationDate = claims.getExpiration();
+
+            return expirationDate.before(new Date());
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public String getUsernameFromJwt(String jwt) {
-        return this.getClaimsFromToken(jwt).getSubject();
+        return this.getClaimsFromJwt(jwt).getSubject();
     }
 
     private SecretKey getSecretKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    private Claims getClaimsFromToken(String jwt) {
+    private Claims getClaimsFromJwt(String jwt) {
         return Jwts.parser()
                 .verifyWith(this.getSecretKey())
                 .build()
