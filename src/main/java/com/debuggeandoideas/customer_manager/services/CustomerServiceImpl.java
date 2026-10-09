@@ -46,8 +46,25 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public Mono<Map<String, Set<RoleTable>>> readRolesByEmail(String email) {
-        return null;
+    public Mono<Map<String, List<RoleTable>>> readRolesByEmail(String email) {
+        log.info("Reading role by email:{}",email);
+
+        return this.customerRepository.findByEmail(email)
+                .flatMap(customer ->
+                        this.databaseClient
+                            .sql(SELECT_BY_ROLE_QUERY)
+                            .bind("customerId",customer.getId())
+                            .map((row,metadata) -> {
+                                RoleTable roleTable = new RoleTable();
+                                roleTable.setName(row.get("name", String.class));
+                                roleTable.setDescription(row.get("description", String.class));
+                                return roleTable;
+                            })
+                            .all()
+                            .collectList()
+                            .map(roles -> Map.of(email,roles))
+                )
+                .switchIfEmpty(Mono.just(Map.of(email,List.of())));
     }
 
     @Override
