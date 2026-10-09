@@ -28,8 +28,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
 	//R2DBC Dependencies
-	implementation 'org.springframework.boot:spring-data-r2dbc'
-	runtimeOnly 'org.postgresql:r2dbc.postgresql'
+	implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+	runtimeOnly 'org.postgresql:r2dbc-postgresql'
 	runtimeOnly 'io.r2dbc:r2dbc-pool'
 
 	compileOnly 'org.projectlombok:lombok'
