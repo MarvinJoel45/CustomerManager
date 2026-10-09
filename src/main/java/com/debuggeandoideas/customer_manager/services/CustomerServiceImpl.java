@@ -75,9 +75,44 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public Mono<CustomerTable> updateRoleInCustomer(Long id, Set<String> roleName, UpdateRoleOperation operation) {
-        return null;
+    public Mono<CustomerTable> updateRoleInCustomer(Long id, Set<String> roleNames, UpdateRoleOperation operation) {
+        log.info("Updating customer with id:{}",id);
+
+        return this.customerRepository.findById(id)
+                .flatMap(customerDB -> {
+                    if (operation == UpdateRoleOperation.ADD) {
+                        return Flux.fromIterable(roleNames)
+                                .flatMap(roleName ->
+                                        this.databaseClient.sql(INSERT_BY_ROLE_QUERY)
+                                                .bind("customerId", customerDB.getId())
+                                                .bind("roleName",roleName)
+                                                .fetch()
+                                                .rowsUpdated()
+                                                .onErrorResume(error -> {
+                                                    log.error("Error updating customer",error);
+                                                    return Mono.just(0L);
+                                                })
+                                )
+                                .then(Mono.just(customerDB));
+                    } else {
+                        return Flux.fromIterable(roleNames)
+                                .flatMap(roleName ->
+                                        this.databaseClient.sql(DELETE_FROM_CUSTOMER_ROLE_QUERY)
+                                                .bind("customerId", customerDB.getId())
+                                                .bind("roleName",roleName)
+                                                .fetch()
+                                                .rowsUpdated()
+                                )
+                                .then(Mono.just(customerDB));
+                    }
+                });
     }
+
+    private static final String DELETE_FROM_CUSTOMER_ROLE_QUERY = """
+            DELETE FROM customer_role WHERE
+            customer_id = :customerId AND
+            role_name = :roleName
+            """;
 
     private static final String INSERT_BY_ROLE_QUERY = """
             INSERT INTO customer_role (customer_id,role_name)

@@ -14,5 +14,5 @@ public interface CustomerService {
     Mono<CustomerTable> createCustomer(CustomerTable customerTable, Set<RoleTable> roleNames);
     Mono<Map<String, List<RoleTable>>> readRolesByEmail(String email);
     Mono<Void> deleteCustomer(Long id);
-    Mono<CustomerTable> updateRoleInCustomer(Long id, Set<String> roleName, UpdateRoleOperation operation);
+    Mono<CustomerTable> updateRoleInCustomer(Long id, Set<String> roleNames, UpdateRoleOperation operation);
 }
