@@ -69,7 +69,9 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public Mono<Void> deleteCustomer(Long id) {
-        return null;
+        log.info("Deleting customer with id:{}",id);
+
+        return this.customerRepository.deleteById(id);
     }
 
     @Override
