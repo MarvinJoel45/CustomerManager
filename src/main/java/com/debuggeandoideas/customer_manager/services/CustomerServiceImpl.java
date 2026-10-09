@@ -2,7 +2,6 @@ package com.debuggeandoideas.customer_manager.services;
 
 import com.debuggeandoideas.customer_manager.enums.UpdateRoleOperation;
 import com.debuggeandoideas.customer_manager.repositories.CustomerRepository;
-import com.debuggeandoideas.customer_manager.repositories.RoleRepository;
 import com.debuggeandoideas.customer_manager.tables.CustomerTable;
 import com.debuggeandoideas.customer_manager.tables.RoleTable;
 import lombok.RequiredArgsConstructor;
@@ -22,11 +21,10 @@ import java.util.Set;
 public class CustomerServiceImpl implements CustomerService {
 
     private final CustomerRepository customerRepository;
-    private final RoleRepository roleRepository;
     private final DatabaseClient databaseClient;
 
     @Override
-    public Mono<CustomerTable> createCustomer(CustomerTable customerTable, Set<RoleTable> roleNames) {
+    public Mono<CustomerTable> createCustomer(CustomerTable customerTable, Set<String> roleNames) {
         log.info("Create customer with mail:{}",customerTable.getEmail());
 
         return this.customerRepository.save(customerTable)

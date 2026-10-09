@@ -11,7 +11,7 @@ import java.util.Set;
 
 public interface CustomerService {
 
-    Mono<CustomerTable> createCustomer(CustomerTable customerTable, Set<RoleTable> roleNames);
+    Mono<CustomerTable> createCustomer(CustomerTable customerTable, Set<String> roleNames);
     Mono<Map<String, List<RoleTable>>> readRolesByEmail(String email);
     Mono<Void> deleteCustomer(Long id);
     Mono<CustomerTable> updateRoleInCustomer(Long id, Set<String> roleNames, UpdateRoleOperation operation);
