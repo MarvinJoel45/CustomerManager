@@ -8,6 +8,7 @@ import com.debuggeandoideas.customer_manager.tables.RoleTable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,11 +32,14 @@ import java.util.Set;
 public class ManagerController {
 
     private final CustomerService customerService;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     @PostMapping
     public Mono<ResponseEntity<CustomerTable>> createCustomer(@RequestBody CustomerTable customer,
                                                               @RequestParam Set<String> roles) {
         log.info("POST customers/manager");
+
+        customer.setPassword(passwordEncoder.encode(customer.getPassword()));
 
         return customerService.createCustomer(customer, roles)
                 .map(createdCustomer -> ResponseEntity
