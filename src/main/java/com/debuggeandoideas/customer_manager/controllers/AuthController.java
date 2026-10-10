@@ -33,7 +33,7 @@ public class AuthController {
     private final BCryptPasswordEncoder passwordEncoder;
 
     @PostMapping(path = "login")
-    public Mono<ResponseEntity<LoginResponse>> login(LoginRequest loginRequest) {
+    public Mono<ResponseEntity<LoginResponse>> login(@RequestBody LoginRequest loginRequest) {
 
         return this.authService.authenticate(loginRequest.getEmail(),loginRequest.getPassword())
                 .flatMap(jwt ->
