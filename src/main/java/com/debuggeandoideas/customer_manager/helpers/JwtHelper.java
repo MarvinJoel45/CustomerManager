@@ -49,7 +49,7 @@ public class JwtHelper {
             final Claims claims = this.getClaimsFromJwt(jwt);
             final Date expirationDate = claims.getExpiration();
 
-            return expirationDate.before(new Date());
+            return expirationDate.after(new Date());
         } catch (Exception e) {
             return false;
         }
