@@ -48,11 +48,11 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    private static final String LOGIN_ENDPOINT = "/customer/auth/login";
-    private static final String REGISTER_ENDPOINT = "/customer/auth/register";
-    private static final String MANAGER_PATH = "/customer/manager/**";
-    private static final String RATING_PATH = "/customer/rating/**";
-    private static final String RESERVATION_PATH = "/customer/reservation/**";
+    private static final String LOGIN_ENDPOINT = "/auth/login";
+    private static final String REGISTER_ENDPOINT = "/auth/register";
+    private static final String MANAGER_PATH = "/manager/**";
+    private static final String RATING_PATH = "/rating/**";
+    private static final String RESERVATION_PATH = "/reservation/**";
 
     private static final String ROLE_ADMIN = "admin_user";
     private static final String ROLE_PREMIUM = "premium_user";
