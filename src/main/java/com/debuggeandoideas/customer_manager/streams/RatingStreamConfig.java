@@ -1,14 +1,19 @@
 package com.debuggeandoideas.customer_manager.streams;
 
+import com.debuggeandoideas.customer_manager.dtos.RatingEvent;
+import com.debuggeandoideas.customer_manager.dtos.RatingRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 @Configuration
@@ -35,5 +40,37 @@ public class RatingStreamConfig {
         return () -> sink.asFlux()
                 .doOnSubscribe(sub -> log.info("Subscribing to rating sink"))
                 .doOnCancel(() -> log.info("Canceling rating sink"));
+    }
+
+    /**
+     * Input is a JSON string rating request
+     * Output is a JSON string rating event
+     */
+    @Bean
+    public Function<Flux<Message<String>>,Flux<Message<String>>> ratingTransformer() {
+        return flux -> flux.<Message<String>>handle((msg,sink) -> {
+
+            try {
+                RatingRequest ratingRequest = objectMapper.convertValue(msg.getPayload(), RatingRequest.class);
+
+                RatingEvent ratingEvent = RatingEvent.builder()
+                        .uuidCustomer(ratingRequest.getUuidCustomer().toString())
+                        .idRestaurant(ratingRequest.getIdRestaurant().toString())
+                        .comment(ratingRequest.getComment())
+                        .rating(ratingRequest.getRating())
+                        .eventType(CREATED_RATING_EVENT_NAME)
+                        .build();
+
+                Message<String> messageOut = MessageBuilder.withPayload(
+                                this.objectMapper.writeValueAsString(ratingEvent))
+                        .setHeader(KafkaHeaders.KEY,ratingRequest.getIdRestaurant().toString().getBytes())
+                        .setHeader("contentType","text/plain")
+                        .build();
+
+                sink.next(messageOut);
+            } catch (Exception e) {
+                log.error("Error while converting rating event", e);
+            }
+        });
     }
 }
