@@ -1,0 +1,60 @@
+logging:
+  level:
+    io.r2dbc.pool: INFO
+    org:
+      springframework:
+        data.r2dbc: INFO
+        transaction: INFO
+        cloud.stream: INFO
+      kafka: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+server:
+  port: 9090
+
+spring:
+  application:
+    name: customer-manager
+  webflux:
+    base-path: /customer
+
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/customers
+    username: admin
+    password: debuggeandoideas
+    pool:
+      enabled: true
+      initial-size: 15
+      max-size: 30
+      max-life-time: 180000ms
+      max-idle-time: 100000ms
+      max-create-connection-time: 10000ms
+      validation-depth: local
+      validation-query: SELECT 1
+
+  cloud:
+    function:
+      definition: ratingRequestSupplier;ratingTransformer
+    stream:
+      kafka:
+        binder:
+          brokers: localhost:9092
+          auto-create-topics: true
+          producer-properties:
+            acks: all
+            enable.idempotence: true
+
+      bindings:
+        ratingRequestSupplier-out-0:
+          destination: rating-request-internal
+          content-type: text/plain
+        ratingTransformer-in-0:
+          destination: rating-request-internal
+          group: rating-transformer
+          content-type: text/plain
+        ratingTransformer-out-0:
+          destination: rating-events
+          content-type: text/plain
+          producer:
+            partition-count: 1
