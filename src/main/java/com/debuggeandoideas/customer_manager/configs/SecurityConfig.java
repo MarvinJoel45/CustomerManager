@@ -32,6 +32,7 @@ public class SecurityConfig {
                 .authorizeExchange(exchange -> exchange
                         .pathMatchers(HttpMethod.POST,LOGIN_ENDPOINT).permitAll()
                         .pathMatchers(HttpMethod.POST,REGISTER_ENDPOINT).permitAll()
+                        .pathMatchers(SWAGGER_WHITELIST).permitAll()
 
                         .pathMatchers(MANAGER_PATH).hasRole(ROLE_ADMIN)
                         .pathMatchers(RATING_PATH).hasRole(ROLE_PREMIUM)
@@ -57,4 +58,17 @@ public class SecurityConfig {
     private static final String ROLE_ADMIN = "admin_user";
     private static final String ROLE_PREMIUM = "premium_user";
     private static final String ROLE_FREE = "free_user";
+
+    private static final String[] SWAGGER_WHITELIST = {
+            "/swagger-ui.html",
+            "/swagger-ui/**",
+            "/api-docs/**",
+            "/v3/api-docs/**",
+            "/webjars/**",
+            "/customer/swagger-ui.html",
+            "/customer/swagger-ui/**",
+            "/customer/api-docs/**",
+            "/customer/v3/api-docs/**",
+            "/customer/webjars/**"
+    };
 }
